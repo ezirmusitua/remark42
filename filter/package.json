@@ -1,0 +1,13 @@
+{
+  "name": "filter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "WORDS_FILE=../.artifacts/words.json REMARK_URL=https://comment.example.com SITE_ID=site_id REMARK_ADMIN_USER=admin REMARK_ADMIN_PWD=password node .",
+    "start": "node ."
+  },
+  "dependencies": {
+    "node-cron": "^3.0.2"
+  }
+}

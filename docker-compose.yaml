@@ -1,0 +1,62 @@
+version: "3.2"
+
+services:
+  comment:
+    image: umputun/remark42:latest
+    container_name: "comment"
+    hostname: "comment"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    environment:
+      - ADMIN_PASSWD=password                          # 管理员密码
+      - ADMIN_SHARED_ID=shared_id                      # 管理员 ID，登录后获取
+      - ADMIN_SHARED_EMAIL=admin@example.com           # 管理员邮箱，用于接收通知
+      - ALLOWED_HOSTS=example.com                      # 允许使用的域名
+      - AUTH_ANON=true                                 # 是否支持匿名用户
+      - AUTH_EMAIL_FROM=notify@example.com             # 发送用户认证邮件的邮箱
+      - AUTH_GITHUB_CID=github_id                      # Github 应用 ID
+      - AUTH_GITHUB_CSEC=gichub_secret                 # Github 应用 Secret
+      - DEBUG=true                                     # 调试模式
+      - NOTIFY_ADMINS=email                            # 通知方式
+      - NOTIFY_EMAIL_FROM=notify@example.com           # 发送用户认证邮件的邮箱
+      - REMARK_URL=https://remark42.example.com        # Remark42 服务 url
+      - SECRET=secret                                  # Remark42 secret
+      - SITE=site_id                                   # Remark42 site id
+      - SMTP_HOST=smtp.sendgrid.net                    # SMTP 服务器（SendGrid）
+      - SMTP_PORT=465                                  # SMTP 端口（SendGrid）
+      - SMTP_TLS=true                                  # SMTP 启用 TLS
+      - SMTP_USERNAME=apikey                           # SMTP 用户名（SendGrid 直接使用 "apikey"）
+      - SMTP_PASSWORD=password                         # SMPT 密码（SendGrid 使用 apikey）
+
+    ports:
+      - "8081:8080"                                   
+
+    volumes:
+      - /src/comment/.data:/srv/var
+
+  filter:
+    build:
+      context: ./filter
+      dockerfile: Dockerfile
+    container_name: "comment-filter"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    environment:
+      - REMARK_URL=http://comment:8080                # Remark42 服务链接（同一网络内使用 container_name 连接）
+      - SITE_ID=site_id                               # 和 Remark42 的环境变量保持一致
+      - REMARK_ADMIN_USER=admin                       # 直接使用 `admin`
+      - REMARK_ADMIN_PWD=password                     # 和 Remark42 的环境变量保持一致
+      - WORDS_FILE=/data/words.json                   # 需要过滤的关键词列表（JSON 数组），通过 volumes 挂在到容器内
+
+    volumes:
+      - /src/comment/.artifacts/words.json:/data/words.json
